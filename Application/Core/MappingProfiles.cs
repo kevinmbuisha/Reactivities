@@ -1,4 +1,5 @@
 using System.Diagnostics;
+using Application.Activities.DTOs;
 using AutoMapper;
 using Domain;
 using Activity = Domain.Activity;
@@ -11,6 +12,8 @@ public class MappingProfiles : Profile
     {
         // Define your AutoMapper profiles here
         CreateMap<Activity, Activity>();
+        CreateMap<CreateActivityDto, Activity>();
+        CreateMap<EditActivityDto, Activity>();
     }
 
 }
