@@ -4,5 +4,5 @@ namespace Application.Activities.DTOs;
 
 public class CreateActivityDto : BaseActivityDto
 {
-    public string Id { get; set;} = "";
+    public string Id { get; set; } = Guid.NewGuid().ToString();
 }

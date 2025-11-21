@@ -1,69 +1,72 @@
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { useLocation } from 'react-router';
-import agent from '../api/agent';
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import agent from "../api/agent";
+import { useLocation } from "react-router";
+import { type Activity } from "../types";
 
 export const useActivities = (id?: string) => {
-  const location = useLocation();
-  const queryClient = useQueryClient();
+    const queryClient = useQueryClient();
+    const location = useLocation();
 
-  const {data: activities, isPending} = useQuery({
-    queryKey: ['activities'],
-    queryFn: async () => {
-      const response = await agent.get<Activity[]>('/activities');
-      return response.data;
-    },
-    enabled: location.pathname === '/activities' && !id,
-    staleTime: 1000 * 60 * 5
-  });
+    const { data: activities, isPending } = useQuery({
+        queryKey: ['activities'],
+        queryFn: async () => {
+            const response = await agent.get<Activity[]>('/activities');
+            return response.data;
+        },
+        enabled: !id && location.pathname === '/activities'
+    });
 
-  const {data: activity, isLoading: isLoadingActivity} = useQuery({
-    queryKey: ['activity', id],
-    queryFn: async () => {
-      const response = await agent.get<Activity>(`/activities/${id}`);
-      return response.data;
-    },
-    enabled: !!id
-  })
+    const {data: activity, isLoading: isLoadingActivity} = useQuery({
+        queryKey: ['activities', id],
+        queryFn: async () => {
+            const response = await agent.get<Activity>(`/activities/${id}`);
+            return response.data;
+        },
+        enabled: !!id
+    })
 
-  const updateActivity = useMutation({
-    mutationKey: ['updateActivity'],
-    mutationFn: async (activity: Activity) => {
-      await agent.put('/activities', activity);
-      return activity;
-    },
-    onSuccess: async () => {
-      await queryClient.invalidateQueries({
-        queryKey: ['activities']
-      })
+    const updateActivity = useMutation({
+        mutationFn: async (activity: Activity) => {
+            await agent.put('/activities', activity)
+        },
+        onSuccess: async () => {
+            await queryClient.invalidateQueries({
+                queryKey: ['activities']
+            })
+        }
+    })
+
+    const createActivity = useMutation({
+        mutationFn: async (activity: Activity) => {
+            const response = await agent.post('/activities', activity);
+            return response.data;
+        },
+        onSuccess: async () => {
+            await queryClient.invalidateQueries({
+                queryKey: ['activities']
+            })
+        }
+    });
+
+    const deleteActivity = useMutation({
+        mutationFn: async (id: string) => {
+            await agent.delete(`/activities/${id}`)
+        },
+        onSuccess: async () => {
+            await queryClient.invalidateQueries({
+                queryKey: ['activities']
+            })
+        }
+    });
+
+    return {
+        activities,
+        isPending,
+        updateActivity,
+        createActivity,
+        deleteActivity,
+        activity,
+        isLoadingActivity
     }
-  })
-  
-  const createActivity = useMutation({
-    mutationKey: ['createActivity'],
-    mutationFn: async (activity: Activity) => {
-      const response = await agent.post<string>('/activities', activity);
-      return response.data;
-    },
-    onSuccess: async () => {
-      await queryClient.invalidateQueries({
-        queryKey: ['activities']
-      })
-    }
-  })
-  
-  const deleteActivity = useMutation({
-    mutationFn: async (id: string) => {
-      console.log('Deleting activity with ID:', id);
-      console.log('Full URL:', `${import.meta.env.VITE_API_URL}/activities/${id}`);
-      await agent.delete(`/activities/${id}`);
-      return id;
-    },
-    onSuccess: async () => {
-      await queryClient.invalidateQueries({
-        queryKey: ['activities']
-      })
-    }
-  })
 
-  return { activities, isPending, updateActivity, createActivity, deleteActivity, activity, isLoadingActivity };
 }
