@@ -11,6 +11,7 @@ using Application.Activities.Queries;
 using Application.Activities.Commands;
 using Application.Activities.DTOs;
 using Microsoft.CodeAnalysis.Differencing;
+using Microsoft.AspNetCore.Authorization;
 
 namespace API.Controllers;
 
