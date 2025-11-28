@@ -34,7 +34,7 @@ public class ActivitiesController : BaseApiController
     {
         activity.Id = id;
         return HandleResult(await Mediator.Send(new EditActivity.Command { ActivityDto = activity }));
-    }
+    } 
 
     [HttpDelete("{id}")]
     [Authorize(Policy = "IsActivityHost")]
